@@ -1,0 +1,48 @@
+%% Diagrama de componentes - Arquitectura por capas
+flowchart TB
+    subgraph FE["Frontend (Angular)"]
+        login["LoginComponent"]
+        cli["ClienteComponent"]
+        per["PersonalComponent"]
+        apisvc["ApiService + AuthInterceptor"]
+    end
+
+    subgraph BE["Backend (Spring Boot - API REST)"]
+        subgraph CAP_PRES["Capa de presentacion"]
+            ac["AuthController"]
+            pc["ProductoController"]
+            pec["PedidoController"]
+        end
+        subgraph CAP_SEG["Seguridad"]
+            sec["SecurityConfig (HTTP Basic + roles)"]
+        end
+        subgraph CAP_NEG["Capa de negocio"]
+            ps["ProductoService"]
+            pes["PedidoService"]
+        end
+        subgraph CAP_DATOS["Capa de persistencia"]
+            pr["ProductoRepository"]
+            per2["PedidoRepository"]
+            ur["UsuarioRepository"]
+        end
+    end
+
+    db[("Base de datos H2\nen memoria")]
+
+    apisvc -->|HTTP/JSON| sec
+    sec --> ac
+    sec --> pc
+    sec --> pec
+    pc --> ps
+    pec --> pes
+    ac --> ur
+    ps --> pr
+    pes --> pr
+    pes --> per2
+    pr --> db
+    per2 --> db
+    ur --> db
+
+    login --> apisvc
+    cli --> apisvc
+    per --> apisvc

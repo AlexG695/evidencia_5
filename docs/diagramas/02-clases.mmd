@@ -1,0 +1,53 @@
+%% Diagrama de clases - Modelo de dominio
+classDiagram
+    class Producto {
+        +Long id
+        +String nombre
+        +BigDecimal precio
+        +boolean disponible
+    }
+
+    class Pedido {
+        +Long id
+        +String cliente
+        +LocalDateTime fechaHora
+        +EstadoPedido estado
+        +BigDecimal total
+        +agregarDetalle(DetallePedido)
+        +recalcularTotal()
+    }
+
+    class DetallePedido {
+        +Long id
+        +int cantidad
+        +BigDecimal subtotal
+    }
+
+    class Usuario {
+        +Long id
+        +String username
+        +String password
+        +Rol rol
+    }
+
+    class EstadoPedido {
+        <<enumeration>>
+        RECIBIDO
+        EN_PREPARACION
+        LISTO
+        ENTREGADO
+        +siguiente() EstadoPedido
+        +puedeTransicionarA(EstadoPedido) boolean
+    }
+
+    class Rol {
+        <<enumeration>>
+        CLIENTE
+        PERSONAL
+        ADMIN
+    }
+
+    Pedido "1" *-- "1..*" DetallePedido : contiene
+    DetallePedido "*" --> "1" Producto : referencia
+    Pedido --> EstadoPedido : estado
+    Usuario --> Rol : rol

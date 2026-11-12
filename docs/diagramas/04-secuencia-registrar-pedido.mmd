@@ -1,0 +1,31 @@
+%% Diagrama de secuencia - Registrar pedido (flujo minimo)
+sequenceDiagram
+    actor C as Cliente
+    participant A as Angular (ClienteComponent)
+    participant PC as PedidoController
+    participant PS as PedidoService
+    participant PR as ProductoRepository
+    participant DR as PedidoRepository
+    participant DB as H2
+
+    C->>A: Selecciona productos y cantidades
+    A->>PC: POST /api/pedidos (cliente, items)
+    PC->>PS: crearPedido(request)
+    loop por cada item
+        PS->>PR: findById(productoId)
+        PR->>DB: SELECT producto
+        DB-->>PR: producto
+        PR-->>PS: producto
+        alt producto no disponible
+            PS-->>PC: ReglaNegocioException
+            PC-->>A: 400 Bad Request
+        end
+    end
+    PS->>PS: recalcularTotal()
+    PS->>DR: save(pedido)
+    DR->>DB: INSERT pedido + detalles
+    DB-->>DR: ok
+    DR-->>PS: pedido (estado=RECIBIDO)
+    PS-->>PC: pedido
+    PC-->>A: 201 Created (PedidoResponse con total)
+    A-->>C: Muestra pedido y total

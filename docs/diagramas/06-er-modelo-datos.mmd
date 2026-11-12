@@ -1,0 +1,31 @@
+%% Diagrama entidad-relacion - Modelo de datos (H2)
+erDiagram
+    PRODUCTO {
+        bigint id PK
+        varchar nombre
+        decimal precio
+        boolean disponible
+    }
+    PEDIDO {
+        bigint id PK
+        varchar cliente
+        timestamp fecha_hora
+        varchar estado
+        decimal total
+    }
+    DETALLE_PEDIDO {
+        bigint id PK
+        bigint pedido_id FK
+        bigint producto_id FK
+        int cantidad
+        decimal subtotal
+    }
+    USUARIO {
+        bigint id PK
+        varchar username
+        varchar password
+        varchar rol
+    }
+
+    PEDIDO ||--|{ DETALLE_PEDIDO : "tiene"
+    PRODUCTO ||--o{ DETALLE_PEDIDO : "aparece en"

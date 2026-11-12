@@ -1,0 +1,236 @@
+{
+  "info": {
+    "name": "Cafeteria Universitaria - Pedidos (Evidencia 6, Caso 4)",
+    "description": "Pruebas del flujo funcional minimo y del control de acceso del prototipo. Ejecutar el backend en http://localhost:8080 antes de correr la coleccion. Usar 'Run collection' para ejecutar las pruebas en orden.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8080" },
+    { "key": "pedidoId", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "1. Seguridad - Menu SIN credenciales (espera 401)",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{base_url}}/api/productos", "host": ["{{base_url}}"], "path": ["api", "productos"] }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Devuelve 401 sin autenticacion', function () {",
+              "  pm.response.to.have.status(401);",
+              "});"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Cliente - Identidad (GET /auth/me)",
+      "request": {
+        "auth": { "type": "basic", "basic": [
+          { "key": "username", "value": "cliente" },
+          { "key": "password", "value": "cliente123" }
+        ]},
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{base_url}}/api/auth/me", "host": ["{{base_url}}"], "path": ["api", "auth", "me"] }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": { "type": "text/javascript", "exec": [
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Rol CLIENTE', () => pm.expect(pm.response.json().roles).to.include('ROLE_CLIENTE'));"
+          ]}
+        }
+      ]
+    },
+    {
+      "name": "3. Cliente - Consultar menu (GET /productos)",
+      "request": {
+        "auth": { "type": "basic", "basic": [
+          { "key": "username", "value": "cliente" },
+          { "key": "password", "value": "cliente123" }
+        ]},
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{base_url}}/api/productos", "host": ["{{base_url}}"], "path": ["api", "productos"] }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": { "type": "text/javascript", "exec": [
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Devuelve productos disponibles', () => pm.expect(pm.response.json().length).to.be.above(0));"
+          ]}
+        }
+      ]
+    },
+    {
+      "name": "4. Cliente - Registrar pedido (POST /pedidos)",
+      "request": {
+        "auth": { "type": "basic", "basic": [
+          { "key": "username", "value": "cliente" },
+          { "key": "password", "value": "cliente123" }
+        ]},
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"cliente\": \"Juan Perez\",\n  \"items\": [\n    { \"productoId\": 1, \"cantidad\": 2 },\n    { \"productoId\": 4, \"cantidad\": 1 }\n  ]\n}"
+        },
+        "url": { "raw": "{{base_url}}/api/pedidos", "host": ["{{base_url}}"], "path": ["api", "pedidos"] }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": { "type": "text/javascript", "exec": [
+            "pm.test('Status 201', () => pm.response.to.have.status(201));",
+            "const j = pm.response.json();",
+            "pm.test('Estado inicial RECIBIDO', () => pm.expect(j.estado).to.eql('RECIBIDO'));",
+            "pm.test('Total calculado por el servidor (2*18 + 1*22 = 58)', () => pm.expect(Number(j.total)).to.eql(58));",
+            "pm.collectionVariables.set('pedidoId', j.id);"
+          ]}
+        }
+      ]
+    },
+    {
+      "name": "5. Regla - Pedido con producto NO disponible (espera 400)",
+      "request": {
+        "auth": { "type": "basic", "basic": [
+          { "key": "username", "value": "cliente" },
+          { "key": "password", "value": "cliente123" }
+        ]},
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"cliente\": \"Ana Lopez\",\n  \"items\": [\n    { \"productoId\": 5, \"cantidad\": 1 }\n  ]\n}"
+        },
+        "url": { "raw": "{{base_url}}/api/pedidos", "host": ["{{base_url}}"], "path": ["api", "pedidos"] }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": { "type": "text/javascript", "exec": [
+            "pm.test('Status 400 por producto no disponible', () => pm.response.to.have.status(400));",
+            "pm.test('Incluye mensaje de error', () => pm.expect(pm.response.json().mensaje).to.be.a('string'));"
+          ]}
+        }
+      ]
+    },
+    {
+      "name": "6. Seguridad - Cliente intenta cambiar estado (espera 403)",
+      "request": {
+        "auth": { "type": "basic", "basic": [
+          { "key": "username", "value": "cliente" },
+          { "key": "password", "value": "cliente123" }
+        ]},
+        "method": "PATCH",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": { "mode": "raw", "raw": "{ \"estado\": \"EN_PREPARACION\" }" },
+        "url": { "raw": "{{base_url}}/api/pedidos/{{pedidoId}}/estado", "host": ["{{base_url}}"], "path": ["api", "pedidos", "{{pedidoId}}", "estado"] }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": { "type": "text/javascript", "exec": [
+            "pm.test('Status 403: el rol CLIENTE no puede cambiar estado', () => pm.response.to.have.status(403));"
+          ]}
+        }
+      ]
+    },
+    {
+      "name": "7. Personal - Avanzar estado a EN_PREPARACION (PATCH)",
+      "request": {
+        "auth": { "type": "basic", "basic": [
+          { "key": "username", "value": "personal" },
+          { "key": "password", "value": "personal123" }
+        ]},
+        "method": "PATCH",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": { "mode": "raw", "raw": "{ \"estado\": \"EN_PREPARACION\" }" },
+        "url": { "raw": "{{base_url}}/api/pedidos/{{pedidoId}}/estado", "host": ["{{base_url}}"], "path": ["api", "pedidos", "{{pedidoId}}", "estado"] }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": { "type": "text/javascript", "exec": [
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('Estado = EN_PREPARACION', () => pm.expect(pm.response.json().estado).to.eql('EN_PREPARACION'));"
+          ]}
+        }
+      ]
+    },
+    {
+      "name": "8. Regla - Transicion invalida: saltar a ENTREGADO (espera 400)",
+      "request": {
+        "auth": { "type": "basic", "basic": [
+          { "key": "username", "value": "personal" },
+          { "key": "password", "value": "personal123" }
+        ]},
+        "method": "PATCH",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": { "mode": "raw", "raw": "{ \"estado\": \"ENTREGADO\" }" },
+        "url": { "raw": "{{base_url}}/api/pedidos/{{pedidoId}}/estado", "host": ["{{base_url}}"], "path": ["api", "pedidos", "{{pedidoId}}", "estado"] }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": { "type": "text/javascript", "exec": [
+            "pm.test('Status 400: no se puede saltar de EN_PREPARACION a ENTREGADO', () => pm.response.to.have.status(400));"
+          ]}
+        }
+      ]
+    },
+    {
+      "name": "9. Cliente - Consultar pedido (GET /pedidos/{id})",
+      "request": {
+        "auth": { "type": "basic", "basic": [
+          { "key": "username", "value": "cliente" },
+          { "key": "password", "value": "cliente123" }
+        ]},
+        "method": "GET",
+        "header": [],
+        "url": { "raw": "{{base_url}}/api/pedidos/{{pedidoId}}", "host": ["{{base_url}}"], "path": ["api", "pedidos", "{{pedidoId}}"] }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": { "type": "text/javascript", "exec": [
+            "pm.test('Status 200', () => pm.response.to.have.status(200));",
+            "pm.test('El estado quedo en EN_PREPARACION', () => pm.expect(pm.response.json().estado).to.eql('EN_PREPARACION'));"
+          ]}
+        }
+      ]
+    },
+    {
+      "name": "10. Admin - Crear producto (POST /productos)",
+      "request": {
+        "auth": { "type": "basic", "basic": [
+          { "key": "username", "value": "admin" },
+          { "key": "password", "value": "admin123" }
+        ]},
+        "method": "POST",
+        "header": [ { "key": "Content-Type", "value": "application/json" } ],
+        "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Agua embotellada\",\n  \"precio\": 15.00,\n  \"disponible\": true\n}" },
+        "url": { "raw": "{{base_url}}/api/productos", "host": ["{{base_url}}"], "path": ["api", "productos"] }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": { "type": "text/javascript", "exec": [
+            "pm.test('Status 201', () => pm.response.to.have.status(201));",
+            "pm.test('Producto creado con id', () => pm.expect(pm.response.json().id).to.be.a('number'));"
+          ]}
+        }
+      ]
+    }
+  ]
+}

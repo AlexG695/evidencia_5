@@ -1,0 +1,26 @@
+%% Diagrama de casos de uso - Sistema de pedidos para cafeteria universitaria
+flowchart LR
+    cliente(["👤 Cliente"])
+    personal(["👤 Personal"])
+    admin(["👤 Administrador"])
+
+    subgraph SISTEMA["Sistema de pedidos - Cafeteria"]
+        uc1(["Consultar menu"])
+        uc2(["Registrar pedido"])
+        uc3(["Consultar estado del pedido"])
+        uc4(["Actualizar estado del pedido"])
+        uc5(["Gestionar productos"])
+        uc6(["Iniciar sesion"])
+    end
+
+    cliente --- uc1
+    cliente --- uc2
+    cliente --- uc3
+    personal --- uc3
+    personal --- uc4
+    admin --- uc5
+    cliente --- uc6
+    personal --- uc6
+    admin --- uc6
+
+    uc2 -. include .-> uc1

@@ -1,0 +1,14 @@
+%% Diagrama de estados - Ciclo de vida del Pedido
+stateDiagram-v2
+    [*] --> RECIBIDO : registrar pedido
+    RECIBIDO --> EN_PREPARACION : personal inicia preparacion
+    EN_PREPARACION --> LISTO : preparacion terminada
+    LISTO --> ENTREGADO : entregado al cliente
+    ENTREGADO --> [*]
+
+    note right of RECIBIDO
+        Todo pedido nuevo
+        inicia en RECIBIDO.
+        No se permiten saltos
+        ni retrocesos de estado.
+    end note
