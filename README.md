@@ -90,9 +90,3 @@ Incluye pruebas del flujo, de las reglas de negocio (400) y del control de acces
 3. El **total lo calcula el servidor** (el cliente no lo envía).
 4. El estado solo avanza en la secuencia definida; cualquier salto → `400`.
 5. Control de acceso por rol con Spring Security (HTTP Basic, BCrypt).
-
-## Mapa con la evidencia
-
-- **Ejercicio 1** (modelo y plan): `docs/diagramas/` + Documento integrador §1.
-- **Ejercicio 2** (prototipo y pruebas): `backend/`, `frontend/`, `postman/`.
-- **Ejercicio 3** (verificación): matriz final en el Documento integrador §3.1.
