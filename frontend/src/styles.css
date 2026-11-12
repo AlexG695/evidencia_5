@@ -1,0 +1,88 @@
+:root {
+  --azul: #1f4e79;
+  --azul-claro: #2e6da4;
+  --gris: #f4f5f7;
+  --borde: #d6dae0;
+  --texto: #22272e;
+  --verde: #2e7d32;
+  --rojo: #c0392b;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", system-ui, Arial, sans-serif;
+  background: var(--gris);
+  color: var(--texto);
+}
+
+.topbar {
+  background: var(--azul);
+  color: #fff;
+  padding: 0.8rem 1.2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.topbar h1 { font-size: 1.1rem; margin: 0; }
+.topbar .user { font-size: 0.9rem; }
+
+.container { max-width: 900px; margin: 1.2rem auto; padding: 0 1rem; }
+
+.card {
+  background: #fff;
+  border: 1px solid var(--borde);
+  border-radius: 8px;
+  padding: 1rem 1.2rem;
+  margin-bottom: 1.2rem;
+}
+
+h2 { color: var(--azul); font-size: 1.05rem; margin-top: 0; }
+
+table { width: 100%; border-collapse: collapse; }
+th, td { text-align: left; padding: 0.5rem; border-bottom: 1px solid var(--borde); font-size: 0.92rem; }
+th { color: var(--azul); }
+
+input, select {
+  padding: 0.45rem 0.6rem;
+  border: 1px solid var(--borde);
+  border-radius: 6px;
+  font-size: 0.92rem;
+}
+
+button {
+  background: var(--azul-claro);
+  color: #fff;
+  border: none;
+  padding: 0.5rem 0.9rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+button:hover { background: var(--azul); }
+button.secundario { background: #6c757d; }
+button:disabled { background: #a9b2bd; cursor: not-allowed; }
+
+.badge {
+  display: inline-block;
+  padding: 0.15rem 0.55rem;
+  border-radius: 12px;
+  font-size: 0.78rem;
+  color: #fff;
+  background: #6c757d;
+}
+.badge.RECIBIDO { background: #6c757d; }
+.badge.EN_PREPARACION { background: #d68910; }
+.badge.LISTO { background: #2e6da4; }
+.badge.ENTREGADO { background: var(--verde); }
+
+.msg-error { color: var(--rojo); font-size: 0.9rem; margin-top: 0.5rem; }
+.msg-ok { color: var(--verde); font-size: 0.9rem; margin-top: 0.5rem; }
+
+.login-box { max-width: 360px; margin: 4rem auto; }
+.login-box .campo { margin-bottom: 0.8rem; display: flex; flex-direction: column; gap: 0.25rem; }
+.total { font-weight: bold; color: var(--azul); }
+.fila-form { display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+.hint { font-size: 0.82rem; color: #667; }
